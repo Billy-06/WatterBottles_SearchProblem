@@ -4,8 +4,9 @@ class Bottle:
         self.capacity = capacity
         self.current = 0
 
-    def fill(self):
-        self.current = self.capacity
+    def fill(self, amount: int):
+        # self.current = self.capacity
+        self.current = amount
 
     def empty(self):
         self.current = 0
