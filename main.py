@@ -9,23 +9,49 @@ from classes.WaterBottleProblem import *
 def breadth_first_search(problem: Problem) -> int:
     node: Node = Node(problem.initial)
     if problem.goal_test(node.state):
+        print("Breadth First Search Goal state reached:")
+        print("=====================================================")
+        print(node.state)
         return node
+    
+    # The frontier is a queue that contains the nodes that have been discovered but not yet explored
+    # The frontier is initialized with the initial node
     frontier: QueueFrontier = QueueFrontier()
     frontier.add(node)
+    # The explored set contains the states that have been explored
     explored = set()
+
+    # The loop continues until the frontier is empty
     while True:
         if frontier.empty():
             return None
         node = frontier.remove()
         explored.add(node.state)
+        # The actions function returns the set of all possible actions that can be performed
+        # on the bottles at a given state
         for action in problem.actions(node.state):
             child = node.child_node(problem, action)
             print(child.state)
+            # The child node is added to the frontier if it has not been explored or discovered
+            # The child node is returned if it is the goal state
+            # The child node contains three bottles, check that bottles with similar current volume
+            # have not been explored or discovered
             if child.state not in explored and not frontier.contains_state(child.state):
                 if problem.goal_test(child.state):
                     return child
-                print(child.state)
                 frontier.add(child)
+            # If the child node has been discovered but not explored, check if the child node
+            # has a lower depth than the node in the frontier
+            elif frontier.contains_state(child.state):
+                for i in frontier.frontier:
+                    if i.state == child.state:
+                        if i.depth > child.depth:
+                            frontier.add(child)
+                            break
+                        else:
+                            break
+
+            # if child.state
 
     return None
 
@@ -34,21 +60,52 @@ def breadth_first_search(problem: Problem) -> int:
 def depth_first_search(problem: Problem) -> None:
     node: Node = Node(problem.initial)
     if problem.goal_test(node.state):
+        print("Depth First Search Goal state reached:")
+        print("=====================================================")
+        print(node.state)
         return node
+    
+    # The frontier is a stack that contains the nodes that have been discovered but not yet explored
     frontier: StackFrontier = StackFrontier()
     frontier.add(node)
+    # The explored set contains the states that have been explored
     explored = set()
+
+    print("Before the loop")
+    # The loop continues until the frontier is empty
     while True:
+        print("in the loop")
         if frontier.empty():
+            print("Frontier is empty")
             return None
         node = frontier.remove()
         explored.add(node.state)
+        print(child.state)
+        # The actions function returns the set of all possible actions that can be performed
+        # on the bottles at a given state
         for action in problem.actions(node.state):
             child = node.child_node(problem, action)
+            print(child.state)
+            # The child node is added to the frontier if it has not been explored or discovered
+            # The child node is returned if it is the goal state
+            # The child node contains three bottles, check that bottles with similar current volume
+            # have not been explored or discovered
             if child.state not in explored and not frontier.contains_state(child.state):
                 if problem.goal_test(child.state):
                     return child
                 frontier.add(child)
+            # If the child node has been discovered but not explored, check if the child node
+            # has a lower depth than the node in the frontier
+            elif frontier.contains_state(child.state):
+                for i in frontier.frontier:
+                    if i.state == child.state:
+                        if i.depth > child.depth:
+                            frontier.add(child)
+                            break
+                        else:
+                            break
+
+            # if child.state
 
     return None
 
@@ -57,8 +114,11 @@ def depth_first_search(problem: Problem) -> None:
 def greedy_best_first_search(problem: Problem, h=None) -> None:
     node: Node = Node(problem.initial)
     if problem.goal_test(node.state):
+        print("Greedy Best First Search Goal state reached")
+        print("=====================================================")
+        print(node.state)
         return node
-    frontier: PriorityQueueFrontier = PriorityQueueFrontier()
+    frontier :PriorityQueueFrontier = PriorityQueueFrontier()
     frontier.add(node, h(node.state))
     explored = set()
     while True:
@@ -82,6 +142,8 @@ def greedy_best_first_search(problem: Problem, h=None) -> None:
 def a_star_search(problem: Problem, h=None) -> None:
     node: Node = Node(problem.initial)
     if problem.goal_test(node.state):
+        print("A* Search Goal state reached:")
+        print(node.state)
         return node
     frontier :PriorityQueueFrontier = PriorityQueueFrontier()
     frontier.add(node, h(node.state))
@@ -107,6 +169,9 @@ def a_star_search(problem: Problem, h=None) -> None:
 def depth_limited_search(problem: Problem, limit: int) -> None:
     node: Node = Node(problem.initial)
     if problem.goal_test(node.state):
+        print("Depth Limited Search Goal state reached:")
+        print("=====================================================")
+        print(node.state)
         return node
     frontier: StackFrontier = StackFrontier()
     frontier.add(node)
@@ -139,6 +204,9 @@ def iterative_deepening_search(problem: Problem) -> None:
 def recursive_best_first_search(problem: Problem, h=None) -> None:
     node = Node(problem.initial)
     if problem.goal_test(node.state):
+        print("Recursive Best First Search Goal state reached:")
+        print("=====================================================")
+        print(node.state)
         return node
     frontier = PriorityQueueFrontier()
     frontier.add(node, h(node.state))
@@ -204,94 +272,95 @@ def main():
     # Case 1: Start 
     bottle1 = Bottle(10)
     bottle1.current = 10
-    bottle2 = Bottle(6)
-    bottle2.current = 0
-    bottle3 = Bottle(5)
+    bottle3 = Bottle(6)
     bottle3.current = 0
-    # Case 1: Goal 
-    # bottle4 = Bottle(10)
-    # bottle4.current = 0
-    # bottle5 = Bottle(6)
-    # bottle5.current = 5
-    # bottle6 = Bottle(5)
-    # bottle6.current = 5
-
-    # Case 2
-    # bottle4 = Bottle(10)
-    # bottle4.current = 10
-    # bottle5 = Bottle(6)
-    # bottle6 = Bottle(5)
-    # bottle7 = Bottle(10)
-    # bottle8 = Bottle(6)
-    # bottle9 = Bottle(5)
+    bottle2 = Bottle(5)
+    bottle2.current = 0
     caseOne: Node = Node((bottle1, bottle2, bottle3))
     caseOneEnd: Tuple = ( 0, 5, 5 )
 
-    caseTwo = (3, 0, 0)
+    bottle4 = Bottle(10)
+    bottle4.current = 3
+    bottle5 = Bottle(6)
+    bottle5.current = 0
+    bottle6 = Bottle(5)
+    bottle6.current = 0
+    caseTwo: Node = Node((bottle4, bottle5, bottle6))
     caseTwoEnd = (0, 1, 5)
 
-    caseThree = (2, 0, 2)
+    bottle7 = Bottle(10)
+    bottle7.current = 2
+    bottle8 = Bottle(6)
+    bottle8.current = 0
+    bottle9 = Bottle(5)
+    bottle9.current = 2
+    caseThree: Node = Node((bottle7, bottle8, bottle9))
     caseThreeEnd = (9, 0, 0)
 
 
 
+    # Visualize the search algorithms
+    print()
+    # Create the problem
+    print("Visualizing Breadth First Search:")
+    problem = WaterBottleProblem(caseOne, caseOneEnd)
+    problem2 = WaterBottleProblem(caseTwo, caseTwoEnd)
+    problem3 = WaterBottleProblem(caseThree, caseThreeEnd)
+    print("Case 1: Start")
+    breadth_first_search(problem)
+    # print("Case 2: Start")
+    # breadth_first_search(problem2)
+    # print("Case 3: Start")
+    # breadth_first_search(problem3)
+
+
+    
+    
+    print()
+    print("Visualizing Depth First Search:")
     # Create the problem
     problem = WaterBottleProblem(caseOne, caseOneEnd)
-    # problem = WaterBottleProblem(caseTwo, caseTwoEnd)
-    # problem = WaterBottleProblem(caseThree, caseThreeEnd)
-
-    # Test out the different search algorithms
-    # print("Breadth First Search:")
-    # solution = breadth_first_search(problem)
-    # print(solution.solution())
-    # print("Depth First Search:")
-    # solution = depth_first_search(problem)
-    # print(solution.solution())
-    # print("Greedy Best First Search:")
-    # solution = greedy_best_first_search(problem, h=problem.h)
-    # print(solution.solution())
-    # print("A* Search:")
-    # solution = a_star_search(problem, h=problem.h)
-    # print(solution.solution())
-    # print("Iterative Deepening Search:")
-    # solution = iterative_deepening_search(problem)
-    # print(solution.solution())
-    # print("Recursive Best First Search:")
-    # solution = recursive_best_first_search(problem, h=problem.h)
-    # print(solution.solution())
-
-    # Visualize the search algorithms
-    print("Visualizing Breadth First Search:")
-    breadth_first_search(problem)
-    # solution = breadth_first_search(problem)
-    # visualize_search(problem, solution, "Breadth First Search")
-    
-    print("Visualizing Depth First Search:")
+    problem2 = WaterBottleProblem(caseTwo, caseTwoEnd)
+    problem3 = WaterBottleProblem(caseThree, caseThreeEnd)
+    print("Case 1: Start")
     depth_first_search(problem)
-    # solution = depth_first_search(problem)
-    # visualize_search(problem, solution, "Depth First Search")
-    
+    # print("Case 2: Start")
+    # depth_first_search(problem2)
+    # print("Case 3: Start")
+    # depth_first_search(problem3)
+
+    print()
     print("Visualizing Greedy Best First Search:")
+    problem = WaterBottleProblem(caseOne, caseOneEnd)
+    problem2 = WaterBottleProblem(caseTwo, caseTwoEnd)
+    problem3 = WaterBottleProblem(caseThree, caseThreeEnd)
+    print("Case 1: Start")
     greedy_best_first_search(problem, h=problem.h)
-    # visualize_search(problem, solution, "Greedy Best First Search")
-    # solution = greedy_best_first_search(problem, h=problem.h)
-    # visualize_search(problem, solution, "Greedy Best First Search")
-    
+    # print("Case 2: Start")
+    # greedy_best_first_search(problem2, h=problem2.h)
+    # print("Case 3: Start")
+    # greedy_best_first_search(problem3, h=problem3.h)
+
+    print()
     print("Visualizing A* Search:")
+    problem = WaterBottleProblem(caseOne, caseOneEnd)
+    problem2 = WaterBottleProblem(caseTwo, caseTwoEnd)
+    problem3 = WaterBottleProblem(caseThree, caseThreeEnd)
+    print("Case 1: Start")
     a_star_search(problem, h=problem.h)
-    # visualize_search(problem, solution, "A* Search")
-    # solution = a_star_search(problem, h=problem.h)
-    # visualize_search(problem, solution, "A* Search")
+    # print("Case 2: Start")
+    # a_star_search(problem2, h=problem2.h)
+    # print("Case 3: Start")
+    # a_star_search(problem3, h=problem3.h)
+
+
+    print()
     print("Visualizing Iterative Deepening Search:")
     iterative_deepening_search(problem)
-    # visualize_search(problem, solution, "Iterative Deepening Search")
-    # solution = iterative_deepening_search(problem)
-    # visualize_search(problem, solution, "Iterative Deepening Search")
+
+    print()
     print("Visualizing Recursive Best First Search:")
     recursive_best_first_search(problem, h=problem.h)
-    # visualize_search(problem, solution, "Recursive Best First Search")
-    # solution = recursive_best_first_search(problem, h=problem.h)
-    # visualize_search(problem, solution, "Recursive Best First Search")
 
 
 # Test out the different search algorithms

@@ -46,48 +46,58 @@ class WaterBottleProblem(Problem):
     # on the bottles at a given state
     def actions(self, state):
         actions = []
-        for bottle in state:
-            if bottle.current < bottle.capacity:
-                actions.append(("fill", bottle))
-            if bottle.current > 0:
-                actions.append(("empty", bottle))
-        for bottle in state:
-            for other_bottle in state:
-                if bottle != other_bottle and bottle.current > 0 and other_bottle.current < other_bottle.capacity:
-                    actions.append(("pour", bottle, other_bottle))
+        # For each bottle in the state, compare the current volume with the goal volume
+        # If the current volume is less than the goal volume, then the bottle can be filled
+        # If the current volume is greater than 0, then the bottle can either be poured into another bottle
+        # or emptied
+        for i in zip(state, self.goal):
+            if i[0].current < i[1]:
+                actions.append(("fill", i[0]))
+            if i[0].current > 0:
+                for j in state:
+                    if j != i[0]:
+                        actions.append(("pour", i[0], j))
+
+                actions.append(("empty", i[0]))
+                        
+
         return actions
 
-    # The result function returns the state that the bottle transitions to as a result of an action
+        
+    # The result function returns the state that results from performing the action on the state
+    # The action is a tuple with the first element being the action to be performed and the rest
+    # being the arguments to the action
+    # The state is a Node object containing 3 Bottle objects and their current volumes
     def result(self, state, action):
+        # Create a copy of the state
+        new_state = [Bottle(bottle.capacity) for bottle in state]
+        for i, bottle in enumerate(state):
+            new_state[i].current = bottle.current
+
+        # Perform the action on the copy of the state
         if action[0] == "fill":
-            bottle: Bottle = action[1]
-            difference = bottle.capacity - bottle.current
-            bottle.fill(difference)
+            action[1].fill()
         elif action[0] == "empty":
-            bottle: Bottle = action[1]
-            bottle.current = 0
+            action[1].empty()
         elif action[0] == "pour":
-            bottle: Bottle = action[1]
-            other_bottle: Bottle = action[2]
-            other_bottle.fill(bottle.current)
-            bottle.current = 0
-        return state
+            action[1].pour(action[2])
+
+        # Return the new state
+        return tuple(new_state)
 
     # The h represents the heuristic function returns the number the tuples showing the difference between 
     # each bottle's current state and the goal state. use enumerate to get the index of the bottle
     def h(self, state):
         return sum([abs(bottle.current - self.goal[i]) for i, bottle in enumerate(state)])
 
-    # The goal test function checks whether the state is the goal state
-    # The goal state is when the bottles are filled with the capacities specified in the goal 
-    def goal_test(self, state):
-        # if each bottle in state has the current capacity equal to the goal tuple
-        # then the state is the goal state. use enumerate to get the index of the bottle
-        # in the state and the bottle in the goal tuple
-        for i, bottle in enumerate(state):
-            if bottle.current != self.goal[i]:
-                return False
+    # The goal_test function returns true if the state is equal to the goal state
+    # and false otherwise. The state is a node object containing 3 Bottle objects and their current volumes
+    # The goal state is a tuple containing the goal volumes for each bottle
+    def goal_test(self, state: Node):
+        return state[0].current == self.goal[0] and state[1].current == self.goal[1] and state[2].current == self.goal[2]
 
+    # The path_cost function returns the cost of the path from the initial state to the state
+    # The cost is the number of steps taken to reach the state
     def path_cost(self, c, state1, action, state2):
         return c + 1
 

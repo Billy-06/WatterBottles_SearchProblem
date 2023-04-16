@@ -17,6 +17,17 @@ class Node:
         # Compare nodes by path cost
         return self.path_cost < node.path_cost
     
+    def __eq__(self, node: object):
+        # Compare nodes by state
+        return isinstance(node, Node) and self.state[0].current == node.state[0].current and self.state[1].current == node.state[1].current and self.state[2].current == node.state[2].current
+    
+    # make bottle accessible by index
+    def __getitem__(self, index):
+        return self.state[index]
+    
+    def __hash__(self) -> int:
+        return hash(self.state)
+    
     # Make the node iterable in order to check every bottle in the state
     def __iter__(self):
         return iter(self.state)
