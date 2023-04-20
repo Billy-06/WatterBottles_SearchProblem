@@ -28,16 +28,22 @@ b) Repeat (c) but now change the maximum of the bottles [(i) b1: 11, b2: 1 b3: 3
 
 """
 from classes.Problem import Problem
-from classes.Node import *
+from classes.Node import Node
 from classes.Bottle import Bottle
+from typing import Tuple, List
 
 import pydot
 from IPython.display import Image, display
 
-
 class WaterBottleProblem(Problem):
-    def __init__(self, initial, goal=None):
+    def __init__(self, initial: Node, goal: Tuple[int, int, int] =None):
         super().__init__(initial, goal)
+
+    def __iter__(self):
+        return iter(self.initial)
+    
+    def __repr__(self):
+        return f"<WaterBottleProblem {self.initial}>"
 
     # There are only two actions that can be performed on the bottles
     # 1. Fill a bottle
@@ -50,40 +56,43 @@ class WaterBottleProblem(Problem):
         # If the current volume is less than the goal volume, then the bottle can be filled
         # If the current volume is greater than 0, then the bottle can either be poured into another bottle
         # or emptied
-        for i in zip(state, self.goal):
-            if i[0].current < i[1]:
-                actions.append(("fill", i[0]))
-            if i[0].current > 0:
-                for j in state:
-                    if j != i[0]:
-                        actions.append(("pour", i[0], j))
+        for bottle, goal  in zip(state, self.goal):
+            if bottle.current > 0 or bottle.current > goal:
+                for other_bottle in state:
+                    if other_bottle != bottle:
+                        actions.append(("pour", bottle, other_bottle))
 
-                actions.append(("empty", i[0]))
-                        
+                actions.append(("empty", bottle))
+            if bottle.current < goal:
+                actions.append(("fill", bottle))
 
         return actions
-
-        
+  
     # The result function returns the state that results from performing the action on the state
     # The action is a tuple with the first element being the action to be performed and the rest
     # being the arguments to the action
     # The state is a Node object containing 3 Bottle objects and their current volumes
     def result(self, state, action):
-        # Create a copy of the state
-        new_state = [Bottle(bottle.capacity) for bottle in state]
-        for i, bottle in enumerate(state):
-            new_state[i].current = bottle.current
-
-        # Perform the action on the copy of the state
-        if action[0] == "fill":
-            action[1].fill()
-        elif action[0] == "empty":
-            action[1].empty()
-        elif action[0] == "pour":
-            action[1].pour(action[2])
-
-        # Return the new state
-        return tuple(new_state)
+        # The action is a tuple with the first element being the action to be performed and the rest
+        # being the arguments to the action
+        action, *args = action
+        # The state is a Node object containing 3 Bottle objects and their current volume
+        b1, b2, b3 = state
+        # If the action is to fill a bottle, then set the current volume of the bottle to the maximum volume
+        if action == "fill":
+            args[0].fill()
+        # If the action is to empty a bottle, then set the current volume of the bottle to 0
+        elif action == "empty":
+            args[0].empty()
+        # If the action is to pour a bottle into another bottle, then pour the current volume of the first
+        # bottle into the second bottle until the second bottle is full or the first bottle is empty
+        # whichever comes first
+        elif action == "pour":
+                args[0].pour(args[1])
+        # # Return the new state as a Node object
+        # return Node((b1, b2, b3))
+        # Return the new state as a tuple
+        return (b1, b2, b3)
 
     # The h represents the heuristic function returns the number the tuples showing the difference between 
     # each bottle's current state and the goal state. use enumerate to get the index of the bottle
@@ -93,15 +102,15 @@ class WaterBottleProblem(Problem):
     # The goal_test function returns true if the state is equal to the goal state
     # and false otherwise. The state is a node object containing 3 Bottle objects and their current volumes
     # The goal state is a tuple containing the goal volumes for each bottle
-    def goal_test(self, state: Node):
-        return state[0].current == self.goal[0] and state[1].current == self.goal[1] and state[2].current == self.goal[2]
+    def goal_test(self, node: Node):
+        return (node.state[0].current, node.state[1].current, node.state[2].current) == self.goal
 
     # The path_cost function returns the cost of the path from the initial state to the state
     # The cost is the number of steps taken to reach the state
-    def path_cost(self, c, state1, action, state2):
+    def path_cost(self, c, state1: Tuple[Bottle, Bottle, Bottle], action: str, state2: Tuple[Bottle, Bottle, Bottle]):
         return c + 1
 
+    # The value function returns the value of the state
+    # The value is the number of steps taken to reach the state
     def value(self):
         raise NotImplementedError
-
-

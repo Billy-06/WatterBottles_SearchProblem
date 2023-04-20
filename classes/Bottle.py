@@ -41,12 +41,24 @@ class Bottle:
         self.capacity = capacity
         self.current = 0
 
+    def __name__(self):
+        return f"Bottle({self.capacity})"
+    
+    def __repr__(self):
+        return f"Bottle(capacity={self.capacity}, current={self.current})"
+    
+    def copy(self):
+        return Bottle(self.capacity)
+
     def fill(self):
         self.current = self.capacity
         # self.current = amount
 
     def empty(self):
         self.current = 0
+
+    # def __eq__(self, __value: object) -> bool:
+    #     return isinstance(__value, Bottle) and self.current == __value.current and self.capacity == __value.capacity
 
     def pour(self, other: object):
         if self.current > 0:
@@ -78,5 +90,3 @@ class Bottle:
         else:
             return
 
-    def __repr__(self):
-        return f"Bottle(capacity={self.capacity}, current={self.current})"

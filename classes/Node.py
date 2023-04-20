@@ -40,10 +40,16 @@ for tracing the path taken to reach the current node.
 
 from typing import List, Tuple, Union
 from classes.Problem import *
+
 # Define a Node class
 # - A node is a state and a pointer to the parent node
 # - The root node has no parent
 class Node:
+    # Initialize the node with the given state
+    # - The state is a tuple of bottle objects
+    # - The parent is the parent node containing the previous state
+    # - The action is the action taken to reach the current state from the parent state
+    # - The path_cost is the cost to reach the current state from the start state
     def __init__(self, state, parent=None, action=None, path_cost=0):
         # state is a tuple of bottle objects
         self.state: Tuple = state
@@ -53,6 +59,9 @@ class Node:
         self.depth = 0
         if parent:
             self.depth = parent.depth + 1
+
+    def __len__(self) -> int:
+        return len(self.state)
 
     def __lt__(self, node: object):
         # Compare nodes by path cost
@@ -76,7 +85,7 @@ class Node:
     def __repr__(self):
         return "<Node {}>".format(self.state)
 
-    def expand(self, problem):
+    def expand(self, problem: Problem) -> List[object]:
         return [self.child_node(problem, action)
                 for action in problem.actions(self.state)]
 
@@ -223,13 +232,8 @@ node at the front of the list). If the priority queue is empty, an exception is 
 # - The priority queue is ordered by the node's path_cost
 # - The priority queue is FIFO when two nodes have the same path_cost
 class PriorityQueueFrontier(QueueFrontier):
-    def add(self, node: Node):
-        for i, other in enumerate(self.frontier):
-            if node.path_cost < other.path_cost:
-                self.frontier.insert(i, node)
-                break
-        else:
-            self.frontier.append(node)
+    def add(self, node: Node, priority: int):
+        self.frontier.append((priority, node))
 
     def remove(self):
         if self.empty():
@@ -237,3 +241,5 @@ class PriorityQueueFrontier(QueueFrontier):
         else:
             node = self.frontier.pop(0)
             return node
+
+
